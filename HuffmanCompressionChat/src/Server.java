@@ -11,7 +11,7 @@ public class Server {
     OutputStream outputStream = localClient.getOutputStream();
     InputStream inputStream = localClient.getInputStream();
 
-    BufferedReader bufferedInput = new BufferedReader(new InputStreamReader(inputStream));
+//    BufferedReader bufferedInput = new BufferedReader(new InputStreamReader(inputStream));
     Scanner consoleInput = new Scanner(System.in);
 
     DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
@@ -19,20 +19,22 @@ public class Server {
     String textIncoming = null;
     String ourText = null;
     while (true) {
-      textIncoming = bufferedInput.readLine();
-      System.out.println("Text from other side: " + textIncoming);
-      if("BYE".equals(textIncoming))
-        break;
-
-      ourText = consoleInput.nextLine();
-      dataOutputStream.writeBytes(ourText + "\n");
-
-      if("BYE".equals(ourText))
-        break;
+//      textIncoming = bufferedInput.readLine();
+//      System.out.println("Text from other side: " + textIncoming);
+//      if("BYE".equals(textIncoming))
+//        break;
+      ObjectInputStream objectInputStream = new ObjectInputStream(localClient.getInputStream());
+      CompressedData receivedObj = (CompressedData) objectInputStream.readObject();
+      System.out.println(receivedObj.data);
+//      ourText = consoleInput.nextLine();
+//      dataOutputStream.writeBytes(ourText + "\n");
+//
+//      if("BYE".equals(ourText))
+//        break;
     }
 
-    localClient.close();
-    socket.close();
+//    localClient.close();
+//    socket.close();
 
   }
 

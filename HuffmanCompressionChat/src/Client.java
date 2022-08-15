@@ -2,7 +2,9 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -25,19 +27,23 @@ public class Client {
 
     while (true) {
       textTyped = consoleInput.nextLine();
-      dataOutputStream.writeBytes(textTyped + "\n");
+      CompressedData compressedData = new CompressedData(textTyped);
+      System.out.println(compressedData.data);
+//      dataOutputStream.writeBytes(textTyped + "\n");
+      ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+      objectOutputStream.writeObject(compressedData);
 
-      if("BYE".equals(textTyped))
-        break;
-
-      textFromOtherSide = bufferedInput.readLine();
-
-      System.out.println(textFromOtherSide);
-
-      if ("BYE".equals(textFromOtherSide))
-        break;
+//      if("BYE".equals(textTyped))
+//        break;
+//
+//      textFromOtherSide = bufferedInput.readLine();
+//
+//      System.out.println(textFromOtherSide);
+//
+//      if ("BYE".equals(textFromOtherSide))
+//        break;
     }
 
-    localClient.close();
+//    localClient.close();
   }
 }
