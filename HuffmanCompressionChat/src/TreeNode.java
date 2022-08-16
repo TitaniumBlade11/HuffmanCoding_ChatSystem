@@ -1,10 +1,13 @@
 import java.io.Serializable;
 
+/***
+ * The class {@code TreeNode} represent a node in the tree, which contains frequency
+ * and character.
+ */
 public class TreeNode implements Serializable {
     public int frequency;
     public Character character;
     public TreeNode left;
-
     public Character edgeWeight;
     public TreeNode right;
     public TreeNode(int frequency, Character character, TreeNode left, TreeNode right, Character edgeWeight) {
