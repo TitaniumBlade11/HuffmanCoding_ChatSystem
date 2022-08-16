@@ -23,18 +23,22 @@ public class Client {
 
     String textTyped = null;
     String textFromOtherSide = null;
+    HuffmanCoding huffmanCoding = new HuffmanCoding();
+    ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+    ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 
     while (true) {
       textTyped = consoleInput.nextLine();
-      CompressedData compressedData = new CompressedData(textTyped);
-      ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-      objectOutputStream.writeObject(compressedData);
+      CompressedPackage compressedPackage = huffmanCoding.encode(textTyped);
+      objectOutputStream.writeObject(compressedPackage);
 
       if ("BYE".equals(textTyped))
         break;
 
-      ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-      textFromOtherSide = ((CompressedData) objectInputStream.readObject()).data;
+      CompressedPackage incomingCompressedPackage = (CompressedPackage) objectInputStream.readObject();
+      textFromOtherSide = huffmanCoding.decode(incomingCompressedPackage.decodeTreeNodeRoot,
+              incomingCompressedPackage.compressedString);
+
       System.out.println("Text from other side: " + textFromOtherSide);
 
       if (textFromOtherSide.contains("BYE"))
