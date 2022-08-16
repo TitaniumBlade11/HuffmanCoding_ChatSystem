@@ -19,6 +19,9 @@ public class HuffmanCoding {
     }
 
     TreeNode rootNode = new TreeNode();
+    if(heap.size() <= 1) {
+      rootNode = heap.poll();
+    }
     while(heap.size() > 1) {
       TreeNode leftNode = heap.poll();
       TreeNode rightNode = heap.poll();
@@ -38,22 +41,17 @@ public class HuffmanCoding {
   }
 
   public String decode(TreeNode rootNode, String encodedString) {
-    String originalString = "";
+    StringBuilder originalString = new StringBuilder();
     int i=0, j=0;
-    for(; j < encodedString.length(); j++) {
-      String partOfString = "";
-      if(i == j) {
-        partOfString = encodedString.substring(i);
-      } else {
-        partOfString = encodedString.substring(i, j);
-      }
+    for(; j <= encodedString.length(); j++) {
+      String partOfString = encodedString.substring(i, j);
       Character charPart = decodeTheCharacterFromTheTree(rootNode, 0, partOfString);
       if(charPart != null) {
-        originalString += charPart;
+        originalString.append(charPart);
         i = j;
       }
     }
-    return originalString;
+    return originalString.toString();
   }
 
   private void convertEncodingTreeToHashMap(TreeNode rootNode, String accumulate, Map<Character, String> decodingMap) {
