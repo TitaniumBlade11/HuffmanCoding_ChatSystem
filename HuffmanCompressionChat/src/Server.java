@@ -16,15 +16,20 @@ public class Server {
 
     String textIncoming = null;
     String ourText = null;
+    HuffmanCoding huffmanCoding = new HuffmanCoding();
+    ObjectInputStream objectInputStream = new ObjectInputStream(localClient.getInputStream());
+    ObjectOutputStream objectOutputStream = new ObjectOutputStream(localClient.getOutputStream());
+
     try {
       while (true) {
-        ObjectInputStream objectInputStream = new ObjectInputStream(localClient.getInputStream());
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(localClient.getOutputStream());
-        CompressedData receivedObj = (CompressedData) objectInputStream.readObject();
-        textIncoming = receivedObj.data;
+        CompressedPackage compressedPackage = (CompressedPackage) objectInputStream.readObject();
+        textIncoming = huffmanCoding.decode(compressedPackage.decodeTreeNodeRoot, compressedPackage.compressedString);
+
         System.out.println(textIncoming);
+
         ourText = consoleInput.nextLine();
-        objectOutputStream.writeObject(new CompressedData(ourText));
+        CompressedPackage sendCompressedPackage = huffmanCoding.encode(ourText);
+        objectOutputStream.writeObject(sendCompressedPackage);
       }
     } catch (Exception e) {
       System.out.println("All clients disconnected, stopping server.");
