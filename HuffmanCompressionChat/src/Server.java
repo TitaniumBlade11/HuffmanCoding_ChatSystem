@@ -1,5 +1,10 @@
 import java.net.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 // In our implementation, client always starts the conversation when it connects to a server, the
@@ -17,6 +22,11 @@ public class Server {
   public static void main(String[] args) {
     ServerSocket socket = null;
     Socket localClient = null;
+
+    // Storing metrics of input data compression rate as Map:
+    // String input -> {BeforeCompressionSize, AfterCompressionSize, CompressionRatio}
+    Map<String, List<Double>> metricsMap = new HashMap<>();
+
     try {
       // Create a server socket that listens to connection requests from remote client.
       socket = new ServerSocket(10000);
@@ -63,6 +73,17 @@ public class Server {
         // Pack the encoded string and its tree in a CompressedPackage object.
         CompressedPackage sendCompressedPackage = huffmanCoding.encode(ourText);
 
+        // Storing metrics into map for string->(beforeCompressionSize, afterCompressionSize, compressionRatio)
+        Double beforeCompressionSize = (double) ourText.length()*16;// Java uses unicode character encoding for each character.
+        Double afterCompressionSize = (double) compressedPackage.compressedString.length();
+
+        List<Double> metricsList = new ArrayList<>();
+        metricsList.add(beforeCompressionSize);
+        metricsList.add(afterCompressionSize);
+        metricsList.add(afterCompressionSize/ beforeCompressionSize);
+
+        metricsMap.put(ourText, metricsList);
+
         // Push the compressed object through the object output stream pipeline to remote client.
         objectOutputStream.writeObject(sendCompressedPackage);
       }
@@ -76,6 +97,18 @@ public class Server {
       } catch(IOException ioe) {
         System.out.println("Could not close the socket.");
       }
+    }
+
+    // Printing out the metrics of compression
+    System.out.println("--------------METRICS---------------");
+    System.out.println("Input String -> Compression Ratio = (Compressed size / Originalsize)");
+    boolean start = true;
+    for (String key : metricsMap.keySet()) {
+      if(start) {
+        start = false;
+        continue;
+    }
+      System.out.println(key + " ------> " + metricsMap.get(key).get(2));
     }
   }
 }

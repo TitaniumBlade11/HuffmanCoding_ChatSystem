@@ -4,6 +4,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 // In our implementation, client always starts the conversation when it connects to a server, the
@@ -22,6 +27,10 @@ public class Client {
       // Bind the socket to a local port.
       Socket localClient = new Socket("localhost", 10000);
       System.out.println("Connecting to server....");
+
+      // Storing metrics of input data compression rate as Map:
+      // String input -> {BeforeCompressionSize, AfterCompressionSize, CompressionRatio}
+      Map<String, List<Double>> metricsMap = new HashMap<>();
 
       // Get the I/O streams connected to the local socket.
       OutputStream outputStream = localClient.getOutputStream();
@@ -49,6 +58,17 @@ public class Client {
         // Pack the encoded string and its tree in a CompressedPackage object.
         CompressedPackage compressedPackage = huffmanCoding.encode(textTyped);
 
+        // Storing metrics into map for string->(beforeCompressionSize, afterCompressionSize, compressionRatio)
+        Double beforeCompressionSize = (double) textTyped.length()*16;// Java uses unicode character encoding for each character.
+        Double afterCompressionSize = (double) compressedPackage.compressedString.length();
+
+        List<Double> metricsList = new ArrayList<>();
+        metricsList.add(beforeCompressionSize);
+        metricsList.add(afterCompressionSize);
+        metricsList.add(afterCompressionSize/beforeCompressionSize);
+
+        metricsMap.put(textTyped, metricsList);
+
         // Push the compressed object through the object output stream pipeline to remote server.
         objectOutputStream.writeObject(compressedPackage);
 
@@ -64,7 +84,7 @@ public class Client {
         textFromOtherSide = huffmanCoding.decode(incomingCompressedPackage.decodeTreeNodeRoot,
                 incomingCompressedPackage.compressedString);
 
-        System.out.println("Text from other side: " + textFromOtherSide);
+        System.out.println(textFromOtherSide);
 
         // If remote party send "BYE" message, break out of the loop.
         if (textFromOtherSide.contains("BYE"))
@@ -73,6 +93,14 @@ public class Client {
 
       // Safely release the resources occupied by the local client socket.
       localClient.close();
+
+      // Printing out the metrics of compression
+      System.out.println("--------------METRICS---------------");
+      System.out.println("Input String -> Compression Ratio = (Compressed size / Originalsize)");
+      for (String key : metricsMap.keySet()) {
+        System.out.println(key + " ------> " + metricsMap.get(key).get(2));
+      }
+
     } catch (Exception e) {
       System.out.println("Could not establish successful chat communication with the server.");
     }
