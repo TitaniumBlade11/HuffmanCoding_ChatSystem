@@ -6,6 +6,8 @@ import java.util.PriorityQueue;
 /***
  * The class {@code HuffmanCoding} represents the Huffman coding Algorithm, which is used to
  * compress the string.
+ * @authors Siddharth Lalit Chakravorty, Raghunath Reddy Arava, 
+ * Aneesh Gupta Vandanapu, Sai Yesaswi Vadapalli
  */
 public class HuffmanCoding {
 
